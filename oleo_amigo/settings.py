@@ -25,7 +25,9 @@ SECRET_KEY = 'django-insecure-b1zw3goudezy&-zkw$agef+^3^)qg5emh$mh6&m9c7b0mu4am0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "*"
+]
 
 
 # Application definition
@@ -36,10 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles'
+
+    ,'corsheaders'
+    ,'rest_framework'
 
     #Apps Django
-    'mapa_coleta'
+    ,'mapa_coleta'
 ]
 
 MIDDLEWARE = [
@@ -49,7 +54,12 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware'
+
+    #MiddleWares para a bagaça funcionar
+    ,'corsheaders.middleware.CorsMiddleware'
+
+
 ]
 
 ROOT_URLCONF = 'oleo_amigo.urls'
@@ -78,8 +88,12 @@ WSGI_APPLICATION = 'oleo_amigo.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': 'postgres.itdlmpojpxysfcvgwqch',
+        'PASSWORD': 'M@caco48',
+        'HOST': 'aws-0-sa-east-1.pooler.supabase.com',  # O host do Supabase
+        'PORT': '6543'
+        ,'NAME': 'postgres'
     }
 }
 
@@ -114,6 +128,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
