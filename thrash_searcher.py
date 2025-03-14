@@ -1,4 +1,5 @@
 from geopy.geocoders import Nominatim
+from geopy.distance import geodesic
 import requests
 from fake_useragent import UserAgent
 import json
@@ -6,27 +7,27 @@ import json
 class Searcher:
     trash_day_url:str = 'https://apisgi.mosaro.com.br/external/parqueservico/area-coleta/buscar-por-endereco-ou-posicao'
     ua = UserAgent()
-    def __init__(self,adress:str=None):
-        self.adress:str = adress.replace(" ","+")
+    def __init__(self):
         self.session:object = requests.session()
 
-        self.trash_day_info:dict = self._get_trash_day_info()
-        self.lat , self.long = self._get_location()
+    def get_location(self,address) -> float:
+        address_search = address.replace(" ","+")
+        geolocator = Nominatim(user_agent="geoapi", timeout=10)
+        location = geolocator.geocode(address_search)
 
-    def _get_location(self) -> float:
-        geolocator = Nominatim(user_agent="geoapi")
-        location = geolocator.geocode(self.adress)
+        if location is None:
+            print(f"Endereço não encontrado: {address}")
+            return None, None  # Retorna none para evitar erros
 
-        if location:
-            return location.latitude, location.longitude
-        else:
-            return "Endereço não encontrado"
+        return location.latitude, location.longitude
 
-    def _get_trash_day_info(self) -> dict:
+    def get_trash_day_info(self,address) -> dict:
+        address_search = address.replace(" ", "+")
+
         params = {
             'count': 1
             , 'cod_parque_servico': 164
-            , 'address': self.adress
+            , 'address': address_search
             , 'is_frame': True
         }
         headers = {
@@ -41,15 +42,34 @@ class Searcher:
             'User-Agent': self.ua.random,
         }
 
-        response = self.session.get(self.trash_day_url, params=params, headers=headers)
-        dados:dict = json.loads(response.text)
+        #response = self.session.get(self.trash_day_url, params=params, headers=headers)
+        #dados:dict = json.loads(response.text)
 
-        return dados['area_coleta_horario']
+        #return dados['area_coleta_horario']
+
+    def get_intersection(self,street1, street2, city):
+        coords1 = self.get_location(f"{street1}, {city}")
+        coords2 = self.get_location(f"{street2}, {city}")
+
+        if None in (coords1, coords2):
+            return None, None  # Retorna None caso uma das ruas n for encontrada
+
+        dist = geodesic(coords1, coords2).meters  # Calcula a distância entre os pontos
+
+        if dist < 500:  # Se estiverem razoavelmente próximos, assumir como cruzamento
+            return ((coords1[0] + coords2[0]) / 2, (coords1[1] + coords2[1]) / 2)
+        else:
+            return None  # Não parece um cruzamento
 
 if __name__ == '__main__':
-    adress = 'Passagem Lindolfo Collor'
-    #adress = 'Travessa Francisco Monteiro - 474'
-    seacher = Searcher(adress=adress)
+    adress = 'Dr. Freitas, Marco, Belém - PA'
 
-    print(seacher.trash_day_info)
-    print(seacher.lat , seacher.long)
+    street1 = "Av. Almirante Barroso"
+    street2 = "Av. Dr. Freitas"
+    city = "Marco, Belém - PA"
+
+    #adress = 'Travessa Francisco Monteiro - 474'
+    seacher = Searcher()
+
+    print(seacher.get_location(adress))
+    #print(seacher.get_intersection(street1=street1,street2=street2,city=city))

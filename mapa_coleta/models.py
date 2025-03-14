@@ -1,5 +1,4 @@
 from django.db import models
-# Create your models here.
 
 class User(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -9,7 +8,7 @@ class User(models.Model):
     password = models.CharField(max_length=255)
     adress_latitude = models.FloatField()
     adress_longitude = models.FloatField()
-    trash_info = models.JSONField()  # JSONField está disponível a partir do Django 3.1
+    trash_info = models.JSONField()
     trash_section = models.TextField()
 
     class Meta:
@@ -17,3 +16,29 @@ class User(models.Model):
 
     def __str__(self):
         return self.login
+
+class Teste_Api(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    numero_teste = models.TextField(blank=True)
+    nome = models.TextField(blank=True)
+
+    class Meta:
+        db_table = 'Teste_API_'  # Nome da tabela no banco de dados
+
+    def __str__(self):
+        return self.nome
+
+class Enderecos_Pontos_Lixo(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    endereco = models.TextField(blank=True,null=False)
+    tipo_lixeira = models.TextField(blank=True,null=True)
+    tipo_lixo = models.TextField(blank=True,null=False)
+    latitude = models.FloatField()
+    longetude = models.FloatField()
+
+
+    class Meta:
+        db_table = 'endereco_pontos_lixo'  # Nome da tabela no banco de dados
+
+    def __str__(self):
+        return self.endereco
